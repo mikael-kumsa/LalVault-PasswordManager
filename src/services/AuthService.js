@@ -18,15 +18,22 @@ class AuthService {
 
   // Set master password for first time
   async setMasterPassword(password) {
-    try {
-      await SecureStore.setItemAsync(MASTER_PASSWORD_KEY, password);
-      await SecureStore.setItemAsync(IS_FIRST_TIME_KEY, 'false');
-      return true;
-    } catch (error) {
-      console.error('Error setting master password:', error);
-      return false;
-    }
+  try {
+    await SecureStore.setItemAsync(MASTER_PASSWORD_KEY, password);
+    await SecureStore.setItemAsync(IS_FIRST_TIME_KEY, 'false');
+
+    // Debug: read back to confirm storage worked
+    const checkPassword = await SecureStore.getItemAsync(MASTER_PASSWORD_KEY);
+    const checkFlag = await SecureStore.getItemAsync(IS_FIRST_TIME_KEY);
+    console.log('DEBUG: setMasterPassword - storedPassword:', checkPassword);
+    console.log('DEBUG: setMasterPassword - isFirstTimeFlag:', checkFlag);
+
+    return true;
+  } catch (error) {
+    console.error('Error setting master password:', error);
+    return false;
   }
+}
 
   // Verify master password
   async verifyMasterPassword(password) {

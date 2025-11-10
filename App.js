@@ -40,6 +40,7 @@ export default function App() {
 
       // Check if user is already authenticated (has master password set)
       const hasMasterPassword = await AuthService.isMasterPasswordSet();
+      console.log('App initialize: master password exists =', hasMasterPassword);
       setIsAuthenticated(hasMasterPassword);
 
       // Setup app state listener
@@ -129,47 +130,51 @@ export default function App() {
         ref={navigationRef}
       >
         <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
-        <Stack.Navigator 
-          initialRouteName={isAuthenticated ? "Home" : "Login"}
-          screenOptions={{ 
-            headerShown: false,
-            cardStyle: { backgroundColor: theme.colors.background }
-          }}
-        >
-          <Stack.Screen name="Login">
-            {(props) => (
-              <LoginScreen 
-                {...props} 
-                theme={theme} 
-                toggleTheme={toggleTheme} 
-                onLoginSuccess={handleLoginSuccess}
-              />
-            )}
-          </Stack.Screen>
-          <Stack.Screen name="Home">
-            {(props) => (
-              <HomeScreen 
-                {...props} 
-                theme={theme} 
-                toggleTheme={toggleTheme} 
-                updateActivity={updateActivity}
-                onLogout={handleLogout}
-              />
-            )}
-          </Stack.Screen>
-          <Stack.Screen name="AddPassword">
-            {(props) => <AddPasswordScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
-          </Stack.Screen>
-          <Stack.Screen name="EditPassword">
-            {(props) => <EditPasswordScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
-          </Stack.Screen>
-          <Stack.Screen name="Settings">
-            {(props) => <SettingsScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
-          </Stack.Screen>
-          <Stack.Screen name="ChangeMasterPassword">
-            {(props) => <ChangeMasterPasswordScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
-          </Stack.Screen>
-        </Stack.Navigator>
+
+        {/* Render different navigator sets depending on authentication state.
+            Changing isAuthenticated will remount the appropriate navigator. */}
+        {isAuthenticated ? (
+          // Authenticated stack (Home + protected screens)
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Home">
+              {(props) => (
+                <HomeScreen 
+                  {...props} 
+                  theme={theme} 
+                  toggleTheme={toggleTheme} 
+                  updateActivity={updateActivity}
+                  onLogout={handleLogout}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="AddPassword">
+              {(props) => <AddPasswordScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
+            </Stack.Screen>
+            <Stack.Screen name="EditPassword">
+              {(props) => <EditPasswordScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
+            </Stack.Screen>
+            <Stack.Screen name="Settings">
+              {(props) => <SettingsScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
+            </Stack.Screen>
+            <Stack.Screen name="ChangeMasterPassword">
+              {(props) => <ChangeMasterPasswordScreen {...props} theme={theme} toggleTheme={toggleTheme} updateActivity={updateActivity} />}
+            </Stack.Screen>
+          </Stack.Navigator>
+        ) : (
+          // Unauthenticated stack (Login only)
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login">
+              {(props) => (
+                <LoginScreen 
+                  {...props} 
+                  theme={theme} 
+                  toggleTheme={toggleTheme} 
+                  onLoginSuccess={handleLoginSuccess}
+                />
+              )}
+            </Stack.Screen>
+          </Stack.Navigator>
+        )}
       </NavigationContainer>
     </PaperProvider>
   );
